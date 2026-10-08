@@ -1,0 +1,455 @@
+<!-- تم إنشاؤه للأستاذ أمين - حساب احتياطي مزدوج: ameenmatar (أساسي) و amenmatar (احتياطي) -->
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أداة تحليل - نظام حفظ مطور لكل امتحان</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{font-family:'Tajawal',sans-serif; background:#f1f5f9; direction:rtl; margin:0}
+.tab-active{background:#0f172a; color:white}
+.tab-inactive{background:white; color:#64748b; border:1px solid #e2e8f0}
+</style>
+</head>
+<body class="p-3 md:p-4">
+<div class="max-w-[1400px] mx-auto">
+
+<div class="bg-white rounded-2xl shadow-sm border p-4">
+  <div class="flex justify-between items-center flex-wrap gap-3">
+    <div class="flex gap-3 items-center">
+      <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white">🧪</div>
+      <div>
+        <h1 class="text-[15px] font-extrabold">أداة تحليل العلوم والحياة - نظام الحفظ المطور v5</h1>
+        <div id="headerInfo" class="text-[11px] text-slate-500 mt-1"></div>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="saveExamBtn" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">💾 حفظ هذا الامتحان</button>
+      <button id="historyBtn" class="bg-white border px-4 py-2 rounded-xl text-xs font-bold">📚 سجل كل الامتحانات</button>
+    </div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-8 gap-2 mt-4">
+    <input id="school" placeholder="المدرسة" class="p-2 rounded-lg border text-xs">
+    <select id="grade" class="p-2 rounded-lg border text-xs bg-white"><option>الخامس الأساسي</option><option>السادس الأساسي</option></select>
+    <select id="section" class="p-2 rounded-lg border text-xs bg-white"><option>أ</option><option>ب</option><option>ج</option></select>
+    <input id="subject" value="العلوم والحياة" class="p-2 rounded-lg border text-xs">
+    <input id="teacher" value="أ. أمين عبدالرازق" class="p-2 rounded-lg border text-xs">
+    <select id="maxScale" class="p-2 rounded-lg border text-xs bg-amber-50 font-bold"><option value="auto">تلقائي</option><option value="10">من 10</option><option value="20">من 20</option><option value="30">من 30</option><option value="40">من 40</option><option value="100">من 100</option></select>
+    <input id="examTitle" placeholder="عنوان الامتحان: شهري أول" class="p-2 rounded-lg border text-xs bg-blue-50" value="الاختبار الشهري الأول">
+    <input id="testDate" type="date" class="p-2 rounded-lg border text-xs">
+  </div>
+  <div id="scaleAlert" class="hidden mt-2 p-2 rounded-lg bg-blue-50 border text-[11px] text-blue-800"></div>
+  
+  <!-- Explanation box -->
+  <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
+    <div class="bg-slate-50 border rounded-xl p-3">
+      <div class="font-bold text-[11px]">💾 كيف يعمل الحفظ؟</div>
+      <div class="text-[10px] text-slate-600 mt-1 leading-4">
+        • يحفظ في متصفحك (localStorage) - يبقى <b>للأبد</b> حتى تمسح بيانات المتصفح<br>
+        • لا يحتاج إنترنت بعد الحفظ<br>
+        • كل جهاز يحفظ لوحده (لابتوب المدرسة ≠ جوالك)<br>
+        • السعة: ~5 ميجا = ~100 شعبة × 4 امتحانات
+      </div>
+    </div>
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+      <div class="font-bold text-[11px] text-emerald-800">📚 هل يحفظ امتحان ثاني وثالث؟</div>
+      <div class="text-[10px] text-emerald-700 mt-1 leading-4">
+        <b>نعم - النظام الجديد:</b><br>
+        • الخامس أ علوم: شهري 1 (15/9)، شهري 2 (15/10)، نصفي (1/11)، نهائي (20/12)<br>
+        • كل امتحان محفوظ منفصل بتاريخه<br>
+        • عند الضغط على "سجل كل الامتحانات" تختار أي امتحان لنفس الشعبة وتقارن
+      </div>
+    </div>
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+      <div class="font-bold text-[11px] text-indigo-800">📈 الاستفادة البعيدة</div>
+      <div class="text-[10px] text-indigo-700 mt-1 leading-4">
+        • تتبع تطور الطالب: أحمد كان ضعيف (40) ثم مقبول (65) ثم جيد (75)<br>
+        • مقارنة متوسط الشعبة عبر الزمن<br>
+        • تقرير للإدارة: تحسن نسبة النجاح من 60% إلى 85%<br>
+        • تصدير كل الامتحانات مرة واحدة Excel
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-12 gap-4 mt-4">
+<div class="col-span-12 lg:col-span-3">
+  <div class="bg-white rounded-2xl border p-4 sticky top-4">
+    <h3 class="font-bold text-xs mb-2">📤 رفع النتائج</h3>
+    <div id="drop" class="border-2 border-dashed border-blue-300 bg-blue-50/50 rounded-xl p-4 text-center cursor-pointer">
+      <p class="font-bold text-xs">اسحب xlsx / csv</p>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
+    </div>
+    <div id="info" class="hidden mt-2 p-2 bg-emerald-50 border rounded-lg text-[11px]"></div>
+    <div id="err" class="hidden mt-2 p-2 bg-red-50 border rounded-lg text-[11px] text-red-700"></div>
+    <textarea id="manual" class="w-full mt-3 h-20 p-2 border rounded-lg text-xs" placeholder="أحمد 9&#10;سارة 19"></textarea>
+    <button id="parseManual" class="w-full mt-2 bg-slate-800 text-white py-2 rounded-lg text-xs font-bold">+ إضافة</button>
+    <button id="clear" class="w-full mt-2 border py-2 rounded-lg text-xs">مسح الحالي</button>
+    <div class="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10px]">العلامة من 20: اختر "من 20" و 18 ستصبح 90 ممتاز. من 40: 36 → 90</div>
+  </div>
+</div>
+
+<div class="col-span-12 lg:col-span-9">
+  <div class="flex gap-2 mb-3">
+    <button data-tab="students" class="tab-btn tab-active px-4 py-2 rounded-xl text-xs font-bold">📋 الطلاب</button>
+    <button data-tab="analysis" class="tab-btn tab-inactive px-4 py-2 rounded-xl text-xs font-bold">📊 تحليل تنازلي</button>
+    <button data-tab="compare" class="tab-btn tab-inactive px-4 py-2 rounded-xl text-xs font-bold">📈 مقارنة عبر الزمن</button>
+  </div>
+  <div id="stats" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3"></div>
+
+  <div id="tab-students" class="tab-content">
+    <div class="bg-white rounded-2xl border overflow-hidden">
+      <div class="p-3 flex justify-between items-center border-b bg-slate-50/50">
+        <h3 class="font-bold text-xs">جدول الطلاب (<span id="cnt">0</span>) - <span id="titleGrade">-</span></h3>
+        <div class="flex gap-2"><input id="search" placeholder="بحث..." class="p-1.5 px-3 rounded-lg border text-xs w-32"><select id="filterCat" class="p-1.5 rounded-lg border text-xs"><option value="all">الكل</option><option>ممتاز</option><option>جيد جداً</option><option>جيد</option><option>مقبول</option><option>متوسط</option><option>ضعيف</option></select><button id="exportBtn2" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[11px]">تصدير</button></div>
+      </div>
+      <div class="overflow-auto max-h-[60vh]"><table class="w-full text-xs"><thead class="sticky top-0 bg-white border-b text-[10px] text-slate-500"><tr><th class="p-2 text-right">#</th><th class="p-2 text-right">الاسم</th><th class="p-2 text-center">الأصلي</th><th class="p-2 text-center">من 100</th><th class="p-2 text-center">التقدير</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    </div>
+    <div id="plans" class="mt-3 space-y-2"></div>
+  </div>
+
+  <div id="tab-analysis" class="tab-content hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="bg-white border rounded-2xl p-4"><h4 class="font-bold text-xs mb-3">من الممتاز للضعيف (تنازلي)</h4><div id="bars"></div></div>
+      <div class="bg-white border rounded-2xl p-4"><h4 class="font-bold text-xs mb-3">النسب</h4><div id="donut" class="flex justify-center"></div><div id="legend" class="mt-3 grid grid-cols-2 gap-2 text-[10px]"></div></div>
+    </div>
+  </div>
+
+  <div id="tab-compare" class="tab-content hidden">
+    <div class="bg-white border rounded-2xl p-4">
+      <h4 class="font-bold text-xs mb-3">📈 مقارنة امتحانات نفس الشعبة عبر الزمن</h4>
+      <div id="compareArea" class="text-[11px] text-slate-500">احفظ امتحانين لنفس الشعبة لتظهر المقارنة هنا. مثال: الخامس أ - شهري 1 و شهري 2</div>
+    </div>
+  </div>
+
+  <div id="empty" class="bg-white border rounded-2xl p-12 text-center mt-3"><div class="text-3xl">📚</div><p class="font-bold mt-2 text-xs">لم يتم تحميل بيانات</p></div>
+</div>
+</div>
+
+<div id="historyModal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"><div class="bg-white rounded-2xl max-w-4xl w-full p-5 max-h-[85vh] overflow-auto"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-sm">📚 سجل كل الامتحانات المحفوظة</h3><button id="closeHistory" class="text-slate-500">✕</button></div><div id="historyList" class="space-y-2"></div><div class="mt-4 flex gap-2"><button id="exportAll" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs">تصدير كل السجل Excel</button><button id="clearAll" class="border px-4 py-2 rounded-xl text-xs text-red-600">مسح كل السجل</button></div></div></div>
+
+</div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+let students=[];
+let savedExams=JSON.parse(localStorage.getItem('exams_v5')||'[]');
+
+function getCat(m){
+  if(m<50) return {n:'ضعيف', c:'#ef4444', cls:'bg-red-50 text-red-700 border-red-200'};
+  if(m<60) return {n:'متوسط', c:'#f59e0b', cls:'bg-amber-50 text-amber-700 border-amber-200'};
+  if(m<70) return {n:'مقبول', c:'#f97316', cls:'bg-orange-50 text-orange-700 border-orange-200'};
+  if(m<80) return {n:'جيد', c:'#22c55e', cls:'bg-green-50 text-green-700 border-green-200'};
+  if(m<90) return {n:'جيد جداً', c:'#3b82f6', cls:'bg-blue-50 text-blue-700 border-blue-200'};
+  return {n:'ممتاز', c:'#a855f7', cls:'bg-purple-50 text-purple-700 border-purple-200'};
+}
+function parseLine(line){
+  line=line.trim(); if(!line) return null;
+  let m=line.match(/^(.*?)[\s,،]+(\d+(?:[.,]\d+)?)\s*%?\s*$/);
+  let name, mark;
+  if(m){ name=m[1].trim(); mark=m[2]; }
+  else { m=line.match(/^\s*(\d+(?:[.,]\d+)?)[\s,،]+(.*?)\s*$/); if(m){ mark=m[1]; name=m[2].trim(); } else return null; }
+  name=name.replace(/^["']|["']$/g,'').trim();
+  if(!name || name.length<2) return null;
+  let num=parseFloat(mark.replace('،','.').replace(',','.'));
+  if(isNaN(num)) return null;
+  return {name, origMark:num};
+}
+function parseRows(rawRows){
+  let list=[];
+  for(let r of rawRows){
+    if(!r) continue;
+    if(Array.isArray(r)){
+      if(r.length===0) continue;
+      let joined=r.map(x=>String(x||'').trim()).filter(Boolean).join(' ').trim();
+      if(!joined) continue;
+      if(/^(الرقم|رقم|#).*اسم|اسم.*علامة/i.test(joined) && list.length<2) continue;
+      let parsed=parseLine(joined);
+      if(!parsed && r.length>=2){
+        let possibleName=String(r[1]||r[0]).trim();
+        let possibleMark=String(r[2]!==''?r[2]:r[1]).trim();
+        let num=parseFloat(possibleMark.replace('%','').replace('،','.'));
+        if(!isNaN(num) && possibleName.length>2 && !/^(اسم|علامة|درجة|الرقم)/.test(possibleName)){
+          parsed={name:possibleName, origMark:num};
+        }
+      }
+      if(parsed) list.push(parsed);
+    }else if(typeof r==='string'){
+      let p=parseLine(r);
+      if(p) list.push(p);
+    }
+  }
+  return list;
+}
+function normalizeMarks(list){
+  if(list.length===0) return [];
+  let maxOrig=Math.max(...list.map(x=>x.origMark));
+  let scaleSel=document.getElementById('maxScale').value;
+  let scale=1, detected=false;
+  if(scaleSel==='auto'){
+    if(maxOrig<=10){ scale=10; detected=true; }
+    else if(maxOrig<=20){ scale=5; detected=true; }
+    else if(maxOrig<=30){ scale=100/30; detected=true; }
+    else if(maxOrig<=40){ scale=2.5; detected=true; }
+    else { scale=1; }
+  }else{
+    let maxS=parseFloat(scaleSel);
+    scale=100/maxS;
+    if(maxS!==100) detected=true;
+  }
+  let alertBox=document.getElementById('scaleAlert');
+  if(detected){
+    alertBox.classList.remove('hidden');
+    let origScale=scaleSel==='auto'?maxOrig:scaleSel;
+    alertBox.innerHTML=`🔄 تحويل: من ${origScale} → من 100 (مثال: ${list[0]?.origMark} → ${Math.round(list[0]?.origMark*scale)})`;
+  }else{ alertBox.classList.add('hidden'); }
+  return list.map((it,i)=>{
+    let conv=it.origMark*scale;
+    if(conv>100) conv=100;
+    return {id:i+1, num:i+1, name:it.name, origMark:it.origMark, mark:Math.round(conv*10)/10, cat:getCat(conv)};
+  });
+}
+function updateHeader(){
+  let school=document.getElementById('school').value||'غير محدد';
+  let grade=document.getElementById('grade').value;
+  let sec=document.getElementById('section').value;
+  let subject=document.getElementById('subject').value;
+  let title=document.getElementById('examTitle').value;
+  document.getElementById('headerInfo').innerHTML=`
+    <span class="bg-blue-50 border px-2 py-0.5 rounded-full">🏫 ${school}</span>
+    <span class="bg-indigo-50 border px-2 py-0.5 rounded-full">📚 ${subject}</span>
+    <span class="bg-slate-100 border px-2 py-0.5 rounded-full">🎓 ${grade} شعبة ${sec}</span>
+    <span class="bg-amber-50 border px-2 py-0.5 rounded-full">📝 ${title}</span>
+    <span class="bg-emerald-50 border px-2 py-0.5 rounded-full">${students.length} طالب</span>
+  `;
+  document.getElementById('titleGrade').textContent=`${grade} شعبة ${sec}`;
+}
+function render(){
+  updateHeader();
+  if(students.length===0){
+    document.getElementById('tab-students').classList.add('hidden');
+    document.getElementById('tab-analysis').classList.add('hidden');
+    document.getElementById('tab-compare').classList.add('hidden');
+    document.getElementById('empty').classList.remove('hidden');
+    document.getElementById('stats').innerHTML='';
+    return;
+  }
+  document.getElementById('empty').classList.add('hidden');
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));
+  let activeTab=document.querySelector('.tab-btn.tab-active')?.dataset.tab||'students';
+  document.getElementById('tab-'+activeTab).classList.remove('hidden');
+  document.getElementById('cnt').textContent=students.length;
+  let marks=students.map(s=>s.mark);
+  let avg=(marks.reduce((a,b)=>a+b,0)/marks.length).toFixed(1);
+  let max=Math.max(...marks), min=Math.min(...marks);
+  let pass=students.filter(s=>s.mark>=50).length;
+  let passRate=((pass/students.length)*100).toFixed(0);
+  document.getElementById('stats').innerHTML=`
+    <div class="bg-white border rounded-xl p-3"><div class="text-[10px] text-slate-400">المتوسط</div><div class="font-extrabold text-sm">${avg}</div></div>
+    <div class="bg-white border rounded-xl p-3"><div class="text-[10px] text-slate-400">الأعلى / الأدنى</div><div class="font-extrabold text-sm">${max} / ${min}</div></div>
+    <div class="bg-white border rounded-xl p-3"><div class="text-[10px] text-slate-400">نسبة النجاح</div><div class="font-extrabold text-sm text-emerald-600">${passRate}%</div></div>
+    <div class="bg-white border rounded-xl p-3"><div class="text-[10px] text-slate-400">ممتاز+جيد جداً</div><div class="font-extrabold text-sm text-purple-600">${students.filter(s=>s.mark>=80).length}</div></div>
+    <div class="bg-white border rounded-xl p-3"><div class="text-[10px] text-slate-400">يحتاج دعم</div><div class="font-extrabold text-sm text-red-600">${students.filter(s=>s.mark<50).length}</div></div>
+  `;
+  let catsDesc=['ممتاز','جيد جداً','جيد','مقبول','متوسط','ضعيف'];
+  let colors={'ضعيف':'#ef4444','متوسط':'#f59e0b','مقبول':'#f97316','جيد':'#22c55e','جيد جداً':'#3b82f6','ممتاز':'#a855f7'};
+  let counts={}; catsDesc.forEach(c=>counts[c]=0); students.forEach(s=>counts[s.cat.n]++);
+  let maxC=Math.max(...Object.values(counts),1);
+  document.getElementById('bars').innerHTML=catsDesc.map(c=>{
+    let cnt=counts[c]||0, w=(cnt/maxC)*100;
+    return `<div class="flex items-center gap-2"><div class="w-16 text-[11px] font-bold">${c}</div><div class="flex-1 h-6 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full flex items-center justify-end pr-2 text-[10px] text-white font-bold" style="width:${w||5}%;background:${colors[c]};min-width:28px">${cnt||''}</div></div><div class="w-10 text-[10px]">${cnt?Math.round(cnt/students.length*100)+'%':''}</div></div>`;
+  }).join('');
+  let total=students.length, start=0;
+  let svg=`<svg viewBox="0 0 100 100" width="150" height="150">`;
+  catsDesc.forEach(c=>{
+    let v=counts[c]||0; if(v===0) return;
+    let ang=(v/total)*360, large=ang>180?1:0, end=start+ang;
+    let x1=50+38*Math.cos((start-90)*Math.PI/180), y1=50+38*Math.sin((start-90)*Math.PI/180);
+    let x2=50+38*Math.cos((end-90)*Math.PI/180), y2=50+38*Math.sin((end-90)*Math.PI/180);
+    svg+=`<path d="M50,50 L${x1},${y1} A38,38 0 ${large},1 ${x2},${y2} Z" fill="${colors[c]}" stroke="white" stroke-width="1"/>`;
+    start=end;
+  });
+  svg+=`<circle cx="50" cy="50" r="20" fill="white"/><text x="50" y="54" text-anchor="middle" font-size="8" font-weight="bold">${total}</text></svg>`;
+  document.getElementById('donut').innerHTML=svg;
+  document.getElementById('legend').innerHTML=catsDesc.map(c=>`<div class="flex gap-1 items-center"><span style="width:8px;height:8px;background:${colors[c]};border-radius:2px;display:inline-block"></span>${c}: ${counts[c]} (${total?Math.round(counts[c]/total*100):0}%)</div>`).join('');
+
+  let search=document.getElementById('search').value.toLowerCase();
+  let filter=document.getElementById('filterCat').value;
+  let filtered=students.filter(s=>{
+    let ms=!search || s.name.toLowerCase().includes(search);
+    let mc=filter==='all' || s.cat.n===filter;
+    return ms && mc;
+  });
+  document.getElementById('tbody').innerHTML=filtered.map(s=>`<tr class="border-b hover:bg-slate-50"><td class="p-2 text-[11px] text-slate-400">${s.id}</td><td class="p-2 font-medium">${s.name}</td><td class="p-2 text-center"><span class="bg-slate-100 px-2 py-1 rounded text-[11px]">${s.origMark}</span></td><td class="p-2 text-center font-bold">${s.mark}</td><td class="p-2 text-center"><span class="px-2 py-1 rounded-full border text-[10px] font-bold ${s.cat.cls}">${s.cat.n}</span></td></tr>`).join('');
+
+  let plans={
+    'ضعيف':['متابعة فردية 15د','بطاقات علاجية','تجارب حسية','تواصل ولي الأمر'],
+    'متوسط':['تعلم تعاوني','أوراق متدرجة','ربط بالحياة'],
+    'مقبول':['مهام قيادية','مراجعة أخطاء'],
+    'جيد':['أنشطة إثرائية','مشروع صغير'],
+    'جيد جداً':['بحث علمي','تدريب الأقران'],
+    'ممتاز':['مسابقات','مجلة حائط']
+  };
+  let html=`<div class="bg-blue-50 border border-blue-200 rounded-xl p-3"><div class="font-bold text-[11px] text-blue-900">📊 توصية عامة</div><p class="text-[11px] text-blue-800 mt-1">${counts['ضعيف']>total*0.3?'نسبة الضعف عالية - حصص تقوية':'وضع مستقر - استثمر الممتازين'}</p></div>`;
+  catsDesc.slice().reverse().forEach(c=>{ if(counts[c]>0){ html+=`<div class="bg-white border rounded-xl p-3"><div class="font-bold text-[11px]">${c} - ${counts[c]} طالب</div><ul class="mt-1 text-[11px] list-disc pr-4 text-slate-600">${plans[c].map(x=>`<li>${x}</li>`).join('')}</ul></div>`; }});
+  document.getElementById('plans').innerHTML=html;
+
+  // compare - show exams of same class
+  let sameClass=savedExams.filter(e=>e.grade===document.getElementById('grade').value && e.section===document.getElementById('section').value && e.subject===document.getElementById('subject').value);
+  if(sameClass.length>=1){
+    let compareHtml=`<div class="overflow-auto"><table class="w-full text-[11px]"><thead><tr><th class="p-2 text-right">الامتحان</th><th class="p-2">المتوسط</th><th class="p-2">نجاح</th><th class="p-2">ممتاز</th><th class="p-2">ضعيف</th><th class="p-2">التاريخ</th></tr></thead><tbody>`;
+    sameClass.sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(ex=>{
+      let avgEx=(ex.students.reduce((a,b)=>a+b.mark,0)/ex.students.length).toFixed(1);
+      let passEx=ex.students.filter(s=>s.mark>=50).length;
+      let exc=ex.students.filter(s=>s.mark>=90).length;
+      let weak=ex.students.filter(s=>s.mark<50).length;
+      compareHtml+=`<tr class="border-b"><td class="p-2 font-bold">${ex.title}</td><td class="p-2">${avgEx}</td><td class="p-2">${Math.round(passEx/ex.students.length*100)}%</td><td class="p-2">${exc}</td><td class="p-2">${weak}</td><td class="p-2 text-[10px]">${ex.date}</td></tr>`;
+    });
+    // add current if not saved
+    let curAvg=(students.reduce((a,b)=>a+b.mark,0)/students.length).toFixed(1);
+    compareHtml+=`<tr class="border-b bg-amber-50 font-bold"><td class="p-2">الحالي (لم يحفظ بعد)</td><td class="p-2">${curAvg}</td><td class="p-2">${passRate}%</td><td class="p-2">${students.filter(s=>s.mark>=90).length}</td><td class="p-2">${students.filter(s=>s.mark<50).length}</td><td class="p-2">الآن</td></tr>`;
+    compareHtml+=`</tbody></table></div><p class="text-[10px] text-slate-500 mt-2">تلميح: كلما حفظت امتحان جديد لنفس الشعبة، سيظهر هنا للمقارنة عبر الزمن وتتبع تطور الطلاب.</p>`;
+    document.getElementById('compareArea').innerHTML=compareHtml;
+  } else {
+    document.getElementById('compareArea').innerHTML=`<p class="text-[11px] text-slate-500">لا يوجد امتحانات سابقة لنفس الشعبة (${document.getElementById('grade').value} شعبة ${document.getElementById('section').value}). احفظ هذا الامتحان ثم ارفع امتحان ثاني لنفس الشعبة وستظهر المقارنة.</p>`;
+  }
+}
+async function handleFile(file){
+  if(!file) return;
+  let ext=file.name.split('.').pop().toLowerCase();
+  document.getElementById('info').classList.remove('hidden');
+  document.getElementById('info').textContent=`جاري قراءة ${file.name}...`;
+  try{
+    let raw=[];
+    if(ext==='csv'){ let txt=await file.text(); raw=txt.split(/\r?\n/); }
+    else { let buf=await file.arrayBuffer(); let wb=XLSX.read(buf,{type:'array'}); let sheet=wb.Sheets[wb.SheetNames[0]]; raw=XLSX.utils.sheet_to_json(sheet,{header:1, defval:''}); }
+    let parsed=parseRows(raw);
+    if(parsed.length===0){ document.getElementById('err').classList.remove('hidden'); document.getElementById('err').textContent='لم أجد بيانات'; return; }
+    students=normalizeMarks(parsed);
+    document.getElementById('info').textContent=`✅ ${students.length} طالب`;
+    render();
+  }catch(e){ document.getElementById('err').classList.remove('hidden'); document.getElementById('err').textContent='خطأ: '+e.message; }
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('tab-active'); b.classList.add('tab-inactive');});
+    btn.classList.remove('tab-inactive'); btn.classList.add('tab-active');
+    render();
+  });
+});
+document.getElementById('drop').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',e=>handleFile(e.target.files[0]));
+document.getElementById('drop').addEventListener('dragover',e=>{e.preventDefault();});
+document.getElementById('drop').addEventListener('drop',e=>{e.preventDefault(); handleFile(e.dataTransfer.files[0]);});
+document.getElementById('parseManual').addEventListener('click',()=>{
+  let txt=document.getElementById('manual').value; if(!txt.trim()) return;
+  let parsed=parseRows(txt.split('\n'));
+  if(parsed.length===0) return;
+  let newSt=normalizeMarks(parsed);
+  students=[...students, ...newSt].map((s,i)=>({...s,id:i+1,num:i+1}));
+  document.getElementById('info').classList.remove('hidden');
+  document.getElementById('info').textContent=`✅ أضيف ${newSt.length}`;
+  render();
+});
+document.getElementById('clear').addEventListener('click',()=>{students=[]; render();});
+document.getElementById('search').addEventListener('input',render);
+document.getElementById('filterCat').addEventListener('change',render);
+document.getElementById('maxScale').addEventListener('change',()=>{ if(students.length>0){ let raw=students.map(s=>({name:s.name, origMark:s.origMark})); students=normalizeMarks(raw); render(); }});
+['school','grade','section','subject','examTitle'].forEach(id=>{ document.getElementById(id).addEventListener('input',updateHeader); });
+document.getElementById('testDate').valueAsDate=new Date();
+
+document.getElementById('saveExamBtn').addEventListener('click',()=>{
+  if(students.length===0){ alert('لا يوجد طلاب لحفظهم'); return; }
+  let exam={
+    id:Date.now(),
+    school:document.getElementById('school').value,
+    grade:document.getElementById('grade').value,
+    section:document.getElementById('section').value,
+    subject:document.getElementById('subject').value,
+    teacher:document.getElementById('teacher').value,
+    title:document.getElementById('examTitle').value||'امتحان',
+    date:document.getElementById('testDate').value||new Date().toISOString().split('T')[0],
+    maxScale:document.getElementById('maxScale').value,
+    students:students,
+    timestamp:new Date().toISOString()
+  };
+  savedExams.push(exam);
+  localStorage.setItem('exams_v5', JSON.stringify(savedExams));
+  document.getElementById('info').classList.remove('hidden');
+  document.getElementById('info').textContent=`💾 تم حفظ "${exam.title}" - الآن لديك ${savedExams.filter(e=>e.grade===exam.grade && e.section===exam.section).length} امتحانات لنفس الشعبة`;
+  render();
+});
+
+function renderHistory(){
+  let list=document.getElementById('historyList');
+  if(savedExams.length===0){ list.innerHTML='<p class="text-xs text-slate-400">لا يوجد سجل</p>'; return; }
+  // group by class
+  let groups={};
+  savedExams.forEach(ex=>{
+    let key=`${ex.grade} شعبة ${ex.section} - ${ex.subject}`;
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(ex);
+  });
+  let html='';
+  Object.keys(groups).forEach(g=>{
+    html+=`<div class="border rounded-xl p-3 bg-slate-50"><div class="font-bold text-xs mb-2">📚 ${g} - ${groups[g].length} امتحانات</div>`;
+    groups[g].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(ex=>{
+      let avg=(ex.students.reduce((a,b)=>a+b.mark,0)/ex.students.length).toFixed(1);
+      html+=`<div class="bg-white border rounded-lg p-2 mb-2 flex justify-between items-center"><div><div class="font-bold text-[11px]">${ex.title}</div><div class="text-[10px] text-slate-500">${ex.date} - ${ex.students.length} طالب - متوسط ${avg} - ${ex.school||''}</div></div><div class="flex gap-1"><button onclick="loadExam(${ex.id})" class="bg-slate-900 text-white px-3 py-1 rounded-lg text-[10px]">فتح</button><button onclick="deleteExam(${ex.id})" class="border px-2 py-1 rounded-lg text-[10px]">حذف</button></div></div>`;
+    });
+    html+=`</div>`;
+  });
+  list.innerHTML=html;
+}
+document.getElementById('historyBtn').addEventListener('click',()=>{ renderHistory(); document.getElementById('historyModal').classList.remove('hidden'); });
+document.getElementById('closeHistory').addEventListener('click',()=>document.getElementById('historyModal').classList.add('hidden'));
+window.loadExam=(id)=>{
+  let ex=savedExams.find(e=>e.id===id);
+  if(!ex) return;
+  document.getElementById('school').value=ex.school||'';
+  document.getElementById('grade').value=ex.grade;
+  document.getElementById('section').value=ex.section;
+  document.getElementById('subject').value=ex.subject;
+  document.getElementById('teacher').value=ex.teacher||'';
+  document.getElementById('examTitle').value=ex.title;
+  document.getElementById('testDate').value=ex.date;
+  document.getElementById('maxScale').value=ex.maxScale||'auto';
+  students=ex.students;
+  document.getElementById('historyModal').classList.add('hidden');
+  render();
+};
+window.deleteExam=(id)=>{
+  if(!confirm('حذف هذا الامتحان؟')) return;
+  savedExams=savedExams.filter(e=>e.id!==id);
+  localStorage.setItem('exams_v5', JSON.stringify(savedExams));
+  renderHistory();
+  render();
+};
+document.getElementById('exportAll').addEventListener('click',()=>{
+  if(savedExams.length===0) return;
+  let data=[['المدرسة','الصف','الشعبة','المبحث','عنوان الامتحان','التاريخ','#','الاسم','الأصلي','من 100','التقدير']];
+  savedExams.forEach(ex=>{
+    ex.students.forEach(s=>{
+      data.push([ex.school,ex.grade,ex.section,ex.subject,ex.title,ex.date,s.num,s.name,s.origMark,s.mark,s.cat.n]);
+    });
+  });
+  let ws=XLSX.utils.aoa_to_sheet(data); let wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'كل الامتحانات'); XLSX.writeFile(wb,'سجل_كل_الامتحانات.xlsx');
+});
+document.getElementById('clearAll').addEventListener('click',()=>{
+  if(!confirm('مسح كل السجل نهائياً؟')) return;
+  savedExams=[]; localStorage.removeItem('exams_v5'); renderHistory();
+});
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  if(students.length===0) return;
+  let data=[[`${document.getElementById('school').value}`],[`${document.getElementById('subject').value} - ${document.getElementById('grade').value} شعبة ${document.getElementById('section').value} - ${document.getElementById('examTitle').value}`],[],['#','الاسم','الأصلي','من 100','التقدير']];
+  students.forEach(s=>data.push([s.num,s.name,s.origMark,s.mark,s.cat.n]));
+  let ws=XLSX.utils.aoa_to_sheet(data); let wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'التقرير'); XLSX.writeFile(wb,`تقرير_${document.getElementById('examTitle').value||'امتحان'}.xlsx`);
+});
+document.getElementById('exportBtn2').addEventListener('click',()=>document.getElementById('exportBtn').click());
+updateHeader();
+</script>
+</body>
+</html>
